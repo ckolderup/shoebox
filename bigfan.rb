@@ -4,8 +4,45 @@ require 'json'
 Shoes.app :height => 300, :width => 750, :title => "Big Fan", do
   background cornflowerblue
   @cur = 0
-  @timestamp 
-  @progress
+  @timestamp = nil
+  @progress = nil
+
+  def draw
+    tweet = @tweets[@cur]
+    username = tweet["user"]["screen_name"]
+    profile_link = "http://www.twitter.com/#{username}"
+    name = tweet["user"]["name"]
+    text = tweet["text"]
+    ts = tweet["created_at"]
+    userpic = tweet["user"]["profile_image_url"]
+    permalink = "http://www.twitter.com/#{username}/status/#{tweet["id"]}"
+
+    @display.clear do
+
+      flow :left => 15 do
+        stack :width => 50, :left => 10, :top => 10 do
+          image userpic
+        end
+        stack :width => 300, :top => 10 do
+          caption link("@#{username}", 
+                       :click => profile_link),
+                       :margin_bottom => 2
+          para name
+        end
+      end
+      flow :left => 10 do
+        tagline text
+      end
+    end
+
+    @timestamp.clear do
+      inscription link(ts, :click => permalink)
+    end
+
+    @progress.clear do
+      inscription "#{@cur+1}/#{@tweets.size}"
+    end
+  end
   
   stack :height => 250, :top => 25, :width => 700, :left => 25 do
     background white
@@ -14,10 +51,10 @@ Shoes.app :height => 300, :width => 750, :title => "Big Fan", do
     end
     flow do
       @timestamp = stack :width => 600 do
-        inscription ""
+        inscription " "
       end
       @progress = stack :width => 50, :right => 5 do
-        inscription ""
+        inscription " "
       end
     end
   end
@@ -33,7 +70,7 @@ Shoes.app :height => 300, :width => 750, :title => "Big Fan", do
     
   else
     #parse tweets
-    @tweets = JSON.parse response.body
+    @tweets = JSON.parse(response.body)
     
     #preload images
     stack :height => 20 do
@@ -63,39 +100,3 @@ Shoes.app :height => 300, :width => 750, :title => "Big Fan", do
   end
 end
 
-def draw
-  tweet = @tweets[@cur]
-  username = tweet["user"]["screen_name"]
-  profile_link = "http://www.twitter.com/#{username}"
-  name = tweet["user"]["name"]
-  text = tweet["text"]
-  ts = tweet["created_at"]
-  userpic = tweet["user"]["profile_image_url"]
-  permalink = "http://www.twitter.com/#{username}/status/#{tweet["id"]}"
-  
-  @display.clear do
-
-    flow :left => 15 do
-      stack :width => 50, :left => 10, :top => 10 do
-        image userpic
-      end
-      stack :width => 300, :top => 10 do
-        caption link("@#{username}", 
-          :click => profile_link),
-          :margin_bottom => 2
-        para name
-      end
-    end
-    flow :left => 10 do
-      tagline text
-    end
-  end
-  
-  @timestamp.clear do
-    inscription link(ts, :click => permalink)
-  end
-
-  @progress.clear do
-    inscription "#{@cur+1}/#{@tweets.size}"
-  end
-end
