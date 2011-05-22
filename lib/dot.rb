@@ -14,10 +14,10 @@ class Dot
   attr_accessor :pos, :size, :mass, :v
 
   def initialize(app, pos, opt = {})
+    Shoes.debug "HELP MEEEEE"
     @app = app
     @pos = Point.new(*pos)
-    
-    @v = Point.new(*opt[:vel]) || Point.new(0.0, 0.0)
+    @v = opt[:v] ? Point.new(*opt[:v]) : Point.new(0.0, 0.0)
     @fv = Point.new(@v.x, @v.y)
     @size = opt[:size] || 25
     @mass = opt[:mass] || 1
@@ -37,7 +37,21 @@ class Dot
     return @rect.width == 0 ? "dead" : "dying"
   end
 
+  def pos=(arr)
+    @pos = Point.new(*arr)
+    @rect.move @pos.x, @pos.y
+  end
+  
+  def velocitize
+    if DEBUG && (@v.x != @fv.x or @v.y != @fv.y) then
+      Shoes.debug "#{@name} from #{@v.to_s} to #{@fv.to_s}"
+    end
+    @v.x = @fv.x
+    @v.y = @fv.y
+  end
+
   def move
+    velocitize
     @pos.x += @v.x * @mass
     @pos.y += @v.y * @mass
     @rect.move @pos.x, @pos.y
@@ -50,7 +64,7 @@ class Dot
     end
 
     contact.each do |other|
-     collide(other)
+      collide(other)
     end
 
     if hit_wall? #TODO: refactor, there's some duplicate logic in here
@@ -85,25 +99,23 @@ class Dot
     Point.new(@pos.x + step*@v.x, @pos.y + step*@v.y)
   end
 
+  def overlap?(other, at=0)
+    fpos = self.pos_at(at)
+    ofpos = other.pos_at(at)
+    
+    return (fpos.x + @size >= ofpos.x              and
+            fpos.x         <= ofpos.x + other.size and
+            fpos.y + @size >  ofpos.y              and
+            fpos.y         <= ofpos.y + other.size)
+  end
+
   def will_hit?(other)
     (0.1..1.0).step(0.3).each do |i|
-      fpos = self.pos_at(i)
-      ofpos = other.pos_at(i)
-      return true if fpos.x + @size >= ofpos.x              and
-                     fpos.x         <= ofpos.x + other.size and
-                     fpos.y + @size >  ofpos.y              and
-                     fpos.y         <= ofpos.y + other.size
+      next if !(self.overlap?(other, i))
+      return true
     end
     return false
   end
   
-  def velocitize
-    if DEBUG && (@v.x != @fv.x or @v.y != @fv.y) then
-      Shoes.debug "#{@name} from #{@v.to_s} to #{@fv.to_s}"
-    end
-    @v.x = @fv.x
-    @v.y = @fv.y
-  end
-
 end
 
