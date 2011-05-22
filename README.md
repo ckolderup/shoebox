@@ -12,5 +12,7 @@ You can navigate between the tweets using the up/down arrow keys, page up, page 
 
 Dots creates a sandbox for dots to bounce around. Press 'a' to add a new dot. As you add new dots, the older ones will phase out. But that's okay! Such is life.
 
+Dots comes with lib/dot.rb, which is some code that could theoretically be used to do more stuff in the future. I might write some actual games or something!
+
 [shoesrb]: http://shoesrb.com
 [tsw]: http://ckolderup.tumblr.com/post/5674571526/two-shoes-weekend
