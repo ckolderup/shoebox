@@ -76,7 +76,6 @@ Shoes.app :height => 300, :width => 750, :title => "Big Fan", do
     end
   end
 
-  #parse tweets
   @tweets = fetch(1)
   @tweets += fetch(2)
   @tweets += fetch(3)
@@ -90,11 +89,9 @@ Shoes.app :height => 300, :width => 750, :title => "Big Fan", do
     end
   end
   
-  #draw 
   draw
 
   keypress do |k|
-    #changes
     @cur = @cur + 1 if (k == :down || k == :page_down || k == :space)
     @cur = @cur - 1 if (k == :up || k == :page_up || k == :shift_space)
     @cur = 0 if (k == :home)
@@ -104,7 +101,6 @@ Shoes.app :height => 300, :width => 750, :title => "Big Fan", do
     @cur = 0 if @cur < 0
     @cur = @tweets.size - 1 if @cur >= @tweets.size
 
-    #repaint
     draw
   end
 end
