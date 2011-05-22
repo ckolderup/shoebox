@@ -1,5 +1,9 @@
 DEBUG = true
-MAX_BLOCKS = 15
+DOT_SIZE_MIN = 40
+DOT_SIZE_MAX = 60
+DOT_COUNT_MAX = 4
+DOT_SPEED_MIN = 0
+DOT_SPEED_MAX = 20
 
 class Point
   attr_accessor :x, :y
@@ -13,7 +17,7 @@ class Point
   end
 end
 
-class Sprite
+class Dot
   attr_accessor :pos, :size, :mass, :v
 
   def initialize(app, pos, opt = {})
@@ -37,7 +41,7 @@ class Sprite
     if @rect.width == 0 then
       @rect.remove
     end
-    return @rect.width
+    return @rect.width == 0 ? "dead" : "dying"
   end
 
   def move
@@ -110,14 +114,14 @@ class Sprite
 
 end
 
-Shoes.app do
+Shoes.app :height => 640, :width => 640 do
   
   def addDot
-      vel = [(0..20).to_a.sample, (0..20).to_a.sample]
+      vel = [(DOT_SPEED_MIN..DOT_SPEED_MAX).to_a.sample, (DOT_SPEED_MIN..DOT_SPEED_MAX).to_a.sample]
       pos = [(0..self.width).to_a.sample, (0..self.height).to_a.sample]
       fill self.send(@colors.sample)
-      @dots << Sprite.new(self, pos, :size => (6..30).to_a.sample, :vel => vel)
-      @dying << @dots.shift if (@dots.size > MAX_BLOCKS)
+      @dots << Dot.new(self, pos, :size => (DOT_SIZE_MIN..DOT_SIZE_MAX).to_a.sample, :vel => vel)
+      @dying << @dots[0] if (@dots.size > DOT_COUNT_MAX)
   end
   
   background black
@@ -141,7 +145,10 @@ Shoes.app do
     end 
 
     @dying.each do |dot|
-      @dying.delete(dot) if (!dot.die_slowly)
+      if (dot.die_slowly == "dead") then
+        @dying.delete(dot)
+        @dots.delete(dot)
+      end
     end 
 
   end
