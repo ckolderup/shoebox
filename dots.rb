@@ -1,13 +1,13 @@
 DEBUG = true
-DOT_SIZE_MIN = 40
+DOT_SIZE_MIN = 20
 DOT_SIZE_MAX = 60
 DOT_COUNT_MAX = 4
 DOT_SPEED_MIN = 0
 DOT_SPEED_MAX = 20
 
-require 'dot'
+require 'lib/dot'
 
-Shoes.app :height => 640, :width => 640 do
+Shoes.app :height => 640, :width => 640, :title => "Dots!" do
   
   def addDot
       vel = [(DOT_SPEED_MIN..DOT_SPEED_MAX).to_a.sample, (DOT_SPEED_MIN..DOT_SPEED_MAX).to_a.sample]
