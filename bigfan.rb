@@ -1,12 +1,7 @@
 require 'net/http'
 require 'json'
 
-Shoes.app :height => 300, :width => 750, :title => "Big Fan", do
-  background cornflowerblue
-  @cur = 0
-  @timestamp = nil
-  @progress = nil
-
+module Bigfan
   def draw
     tweet = @tweets[@cur]
     username = tweet["user"]["screen_name"]
@@ -43,6 +38,28 @@ Shoes.app :height => 300, :width => 750, :title => "Big Fan", do
       inscription "#{@cur+1}/#{@tweets.size}"
     end
   end
+
+  def fetch(page=1)
+
+    uri = URI.parse("http://www.twitter.com/favorites/ckolderup.json?page=#{page}")
+    http = Net::HTTP.new(uri.host, uri.port)
+    request = Net::HTTP::Get.new(uri.request_uri)
+    response = http.request(request)
+    if (response.code != "200") then
+      return nil
+    else
+      return JSON.parse(response.body)
+    end
+  end
+end
+
+Shoes.app :height => 300, :width => 750, :title => "Big Fan", do
+  extend Bigfan
+
+  background cornflowerblue
+  @cur = 0
+  @timestamp = nil
+  @progress = nil
   
   stack :height => 250, :top => 25, :width => 700, :left => 25 do
     background white
@@ -59,30 +76,22 @@ Shoes.app :height => 300, :width => 750, :title => "Big Fan", do
     end
   end
 
-  uri = URI.parse("http://www.twitter.com/favorites/ckolderup.json")
-  http = Net::HTTP.new(uri.host, uri.port)
-  request = Net::HTTP::Get.new(uri.request_uri)
-  response = http.request(request)
-
-  if (response.code != "200") then
-    @display.clear
-    @display.append { para "HTTP Return #{response.code}" }
-    
-  else
-    #parse tweets
-    @tweets = JSON.parse(response.body)
-    
-    #preload images
-    stack :height => 20 do
-      hide
-      @tweets.each do |x|
-        image x["user"]["profile_image_url"]
-      end
+  #parse tweets
+  @tweets = fetch(1)
+  @tweets += fetch(2)
+  @tweets += fetch(3)
+  @tweets = @tweets.take(50)
+  
+  #preload images
+  stack :height => 20 do
+    hide
+    @tweets.each do |x|
+      image x["user"]["profile_image_url"]
     end
-    
-    #draw 
-    draw
   end
+  
+  #draw 
+  draw
 
   keypress do |k|
     #changes
